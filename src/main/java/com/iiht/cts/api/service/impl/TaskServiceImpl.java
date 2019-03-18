@@ -4,6 +4,7 @@
 package com.iiht.cts.api.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,30 +106,69 @@ public class TaskServiceImpl implements ITaskService {
 	 */
 	@Override
 	public Task addTask(Task task) {
-		Task savedTask = null;
+		Task newlySavedTask = null;
 		try {
 			String operation = HttpMethod.POST.name();
 			// Validates and Throws Exception for the New Resource - Task
 			validateNewResourceAndThrowException(task, operation);
 			// Updates the ParentId If not present to avoid creating duplicate Parent Entities
-			if (null != task.getParentTask() && null == task.getParentTask().getParentTaskId()) {
+			if (null != task.getParentTask() && null == task.getParentTask().getParentTaskId()
+					&& !StringUtils.isEmpty(task.getParentTask().getParentTaskName())) {
 				// Finds a Parent Task by Name to determine if it is already exist
 				Optional<AppTParentTask> parentTaskEntity = parentTaskRepository
 						.findByParentTaskName(task.getParentTask().getParentTaskName());
 				if (parentTaskEntity.isPresent()) {
 					task.getParentTask().setParentTaskId(parentTaskEntity.get().getParentTaskId());
 				} else {
-					parentTaskRepository.save(task.getParentTask());
+					// Creates New Parent Task
+					AppTParentTask appTParentTask = new AppTParentTask();
+					appTParentTask.setParentTaskName(task.getParentTask().getParentTaskName());
+					appTParentTask = parentTaskRepository.save(appTParentTask);
+					task.getParentTask().setParentTaskId(appTParentTask.getParentTaskId());
 				}
 			}
-			// Saves and Returns the newly added Task
-			savedTask = taskRepository.save(task);
+			// Saves and Returns the Newly Added Task
+			AppTTask newTask = populateAndSaveTaskDetails(task, true);
+			// Populates the Saved Task Details 
+			newlySavedTask = populateTaskDetails(newTask);
 		} catch (Exception exc) {
 			LOGGER.error("Error occurred when trying to add a new Task", exc);
 			HttpStatus httpStatus = AnnotationUtils.findAnnotation(exc.getClass(), ResponseStatus.class).code();
 			throw new TaskTechnicalException(exc.getMessage(), httpStatus);
 		}
-		return savedTask;
+		return newlySavedTask;
+	}
+
+	/**
+	 * Populates and Saves Task Details
+	 * 
+	 * @param task
+	 * @param isNewTask
+	 * @return
+	 */
+	private AppTTask populateAndSaveTaskDetails(Task task, boolean isNewTask) {
+		// Task Details
+		AppTTask appTTask = null;
+		if (isNewTask) {
+			// Creates a new Task Entity
+			appTTask = new AppTTask();
+			appTTask.setCreatedDate(new Date(System.currentTimeMillis()));
+		} else {
+			// Retrieves the existing Task Entity 
+			appTTask = taskRepository.getOne(task.getTaskId());
+			appTTask.setModifiedDate(new Date(System.currentTimeMillis()));
+		}
+		appTTask.setTaskName(task.getTaskName());
+		appTTask.setPriority(task.getPriority());
+		appTTask.setStartDate(task.getStartDate());
+		appTTask.setEndDate(task.getEndDate());
+		appTTask.setActive(task.getActive());
+		// Parent Task Details
+		AppTParentTask appTParentTask = new AppTParentTask();
+		appTParentTask.setParentTaskId(task.getParentTask().getParentTaskId());
+		appTParentTask.setParentTaskName(task.getParentTask().getParentTaskName());
+		appTTask.setParentTask(appTParentTask);
+		return taskRepository.save(appTTask);
 	}
 
 	/**
@@ -139,36 +179,40 @@ public class TaskServiceImpl implements ITaskService {
 	 * @return an updated {@link AppTTask} identified by its id
 	 */
 	@Override
-	public AppTTask updateTask(Long taskId, AppTTask task) {
-		AppTTask updatedTask = null;
+	public Task updateTask(Long taskId, Task task) {
+		Task modifiedTask = null;
 		try {
 			String operation = HttpMethod.PUT.name();
 			// Validates and Throw Exception for the Existing Resource - Task
 			validateExistingResourceAndThrowException(taskId, operation);
-			// Retrieves a Task by its TaskId
-			AppTTask taskEntity = taskRepository.getOne(taskId);
 			// Sets the requested TaskId
 			task.setTaskId(taskId);
 			// Updates the ParentId If not present to avoid creating duplicate Parent Entities
-			if (null != task.getParentTask() && null == task.getParentTask().getParentTaskId()) {
-				// Finds a Task by Name to determine if it is already exist
+			if (null != task.getParentTask() && null == task.getParentTask().getParentTaskId()
+					&& !StringUtils.isEmpty(task.getParentTask().getParentTaskName())) {
+				// Finds a Parent Task by Name to determine if it is already exist
 				Optional<AppTParentTask> parentTaskEntity = parentTaskRepository
 						.findByParentTaskName(task.getParentTask().getParentTaskName());
 				if (parentTaskEntity.isPresent()) {
 					task.getParentTask().setParentTaskId(parentTaskEntity.get().getParentTaskId());
 				} else {
-					parentTaskRepository.save(task.getParentTask());
+					// Creates New Parent Task
+					AppTParentTask appTParentTask = new AppTParentTask();
+					appTParentTask.setParentTaskName(task.getParentTask().getParentTaskName());
+					appTParentTask = parentTaskRepository.save(appTParentTask);
+					task.getParentTask().setParentTaskId(appTParentTask.getParentTaskId());
 				}
-				/*task.getParentTask().setParentTaskId(taskEntity.getParentTask().getParentTaskId());*/
 			}
-			// Saves and Returns the updated Task
-			updatedTask = taskRepository.save(task);
+			// Saves and Returns the Updated Task
+			AppTTask updatedTask = populateAndSaveTaskDetails(task, false);
+			// Populates the Updated Task Details 
+			modifiedTask = populateTaskDetails(updatedTask);
 		} catch (Exception exc) {
 			LOGGER.error("Error occurred when trying to update an existing Task with TaskId - " + taskId, exc);
 			HttpStatus httpStatus = AnnotationUtils.findAnnotation(exc.getClass(), ResponseStatus.class).code();
 			throw new TaskTechnicalException(exc.getMessage(), httpStatus);
 		}
-		return updatedTask;
+		return modifiedTask;
 	}
 	
 	/**
@@ -191,11 +235,11 @@ public class TaskServiceImpl implements ITaskService {
 		}
 	}
 	
-	/**
+/*	*//**
 	 * Ends an Existing Task
 	 * 
 	 * @param taskId refers to attribute {@code taskId}
-	 */
+	 *//*
 	@Override
 	public void endTask(Long taskId) {
 		try {
@@ -205,6 +249,7 @@ public class TaskServiceImpl implements ITaskService {
 			// Retrieves a Task by its TaskId
 			AppTTask taskEntity = taskRepository.getOne(taskId);
 			taskEntity.setActive("N");
+			taskEntity.setModifiedDate(new Date(System.currentTimeMillis()));
 			// Saves and Returns the updated Task
 			taskRepository.save(taskEntity);
 		} catch (Exception exc) {
@@ -212,7 +257,7 @@ public class TaskServiceImpl implements ITaskService {
 			HttpStatus httpStatus = AnnotationUtils.findAnnotation(exc.getClass(), ResponseStatus.class).code();
 			throw new TaskTechnicalException(exc.getMessage(), httpStatus);
 		}
-	}
+	}*/
 
 	/**
 	 * Validates and Throw Exception for the Existing Resource - Task
@@ -279,6 +324,8 @@ public class TaskServiceImpl implements ITaskService {
 		task.setStartDate(appTTask.getStartDate());
 		task.setEndDate(appTTask.getEndDate());
 		task.setActive(appTTask.getActive());
+		task.setCreatedDate(appTTask.getCreatedDate());
+		task.setModifiedDate(appTTask.getModifiedDate());
 		if (null != appTTask.getParentTask()) {
 			ParentTask parentTask = new ParentTask();
 			parentTask.setParentTaskId(appTTask.getParentTask().getParentTaskId());

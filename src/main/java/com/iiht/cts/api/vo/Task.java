@@ -5,6 +5,7 @@ import java.util.Date;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.core.Relation;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -27,6 +28,12 @@ public class Task extends ResourceSupport {
 	private Date endDate;
 	
 	private String active;
+	
+	@JsonIgnore
+	private Date createdDate;
+	
+	@JsonIgnore
+	private Date modifiedDate;
 	
 	private ParentTask parentTask;
 	
@@ -103,6 +110,7 @@ public class Task extends ResourceSupport {
 	/**
 	 * @return the startDate
 	 */
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
 	public Date getStartDate() {
 		return startDate != null ? (Date) startDate.clone() : null;
 	}
@@ -117,6 +125,7 @@ public class Task extends ResourceSupport {
 	/**
 	 * @return the endDate
 	 */
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
 	public Date getEndDate() {
 		return endDate != null ? (Date) endDate.clone() : null;
 	}
@@ -134,13 +143,6 @@ public class Task extends ResourceSupport {
 	public String getActive() {
 		return active;
 	}
-	
-	/**
-	 * @return the active
-	 */
-	public boolean isActive() {
-		return this.active.equalsIgnoreCase("Y") ? true : false;
-	}
 
 	/**
 	 * @param active the active to set
@@ -149,6 +151,36 @@ public class Task extends ResourceSupport {
 		this.active = active;
 	}
 	
+	/**
+	 * @return the createdDate
+	 */
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
+	public Date getCreatedDate() {
+		return createdDate != null ? (Date) createdDate.clone() : null;
+	}
+
+	/**
+	 * @param createdDate the createdDate to set
+	 */
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate != null ? (Date) createdDate.clone() : null;
+	}
+
+	/**
+	 * @return the modifiedDate
+	 */
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
+	public Date getModifiedDate() {
+		return modifiedDate != null ? (Date) modifiedDate.clone() : null;
+	}
+
+	/**
+	 * @param modifiedDate the modifiedDate to set
+	 */
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate != null ? (Date) modifiedDate.clone() : null;
+	}
+
 	/**
 	 * @return the parentTask
 	 */
@@ -170,11 +202,14 @@ public class Task extends ResourceSupport {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((active == null) ? 0 : active.hashCode());
 		result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
 		result = prime * result + ((parentTask == null) ? 0 : parentTask.hashCode());
 		result = prime * result + ((priority == null) ? 0 : priority.hashCode());
 		result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
 		result = prime * result + ((taskName == null) ? 0 : taskName.hashCode());
+		result = prime * result + ((createdDate == null) ? 0 : createdDate.hashCode());
+		result = prime * result + ((modifiedDate == null) ? 0 : modifiedDate.hashCode());
 		return result;
 	}
 
@@ -190,6 +225,11 @@ public class Task extends ResourceSupport {
 		if (getClass() != obj.getClass())
 			return false;
 		Task other = (Task) obj;
+		if (active == null) {
+			if (other.active != null)
+				return false;
+		} else if (!active.equals(other.active))
+			return false;
 		if (endDate == null) {
 			if (other.endDate != null)
 				return false;
@@ -215,6 +255,16 @@ public class Task extends ResourceSupport {
 				return false;
 		} else if (!taskName.equals(other.taskName))
 			return false;
+		if (createdDate == null) {
+			if (other.createdDate != null)
+				return false;
+		} else if (!createdDate.equals(other.createdDate))
+			return false;
+		if (modifiedDate == null) {
+			if (other.modifiedDate != null)
+				return false;
+		} else if (!modifiedDate.equals(other.modifiedDate))
+			return false;
 		return true;
 	}
 
@@ -224,6 +274,7 @@ public class Task extends ResourceSupport {
 	@Override
 	public String toString() {
 		return "Task [taskId=" + taskId + ", taskName=" + taskName + ", priority=" + priority + ", startDate="
-				+ startDate + ", endDate=" + endDate + ", parentTask=" + parentTask + "]";
+				+ startDate + ", endDate=" + endDate + ", active=" + active + ", createdDate=" + createdDate
+				+ ", modifiedDate=" + modifiedDate + ", parentTask=" + parentTask + "]";
 	}
 }

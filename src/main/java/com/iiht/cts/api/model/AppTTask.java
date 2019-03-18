@@ -59,6 +59,14 @@ public class AppTTask implements Serializable {
 	@Column(name="ACTIVE")
 	private String active;
 	
+	@Column(name="CREATED_DATE")
+	@Temporal(TemporalType.DATE)
+	private Date createdDate;
+	
+	@Column(name="MODIFIED_DATE")
+	@Temporal(TemporalType.DATE)
+	private Date modifiedDate; 
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@OnDelete(action=OnDeleteAction.CASCADE)
 	@JoinColumn(name="PARENT_TASK_ID", nullable=false, foreignKey=@ForeignKey(name="APP_FK_TASK_PARENT_TASK_ID"))
@@ -182,6 +190,34 @@ public class AppTTask implements Serializable {
 	}
 	
 	/**
+	 * @return the createdDate
+	 */
+	public Date getCreatedDate() {
+		return createdDate != null ? (Date) createdDate.clone() : null;
+	}
+
+	/**
+	 * @param createdDate the createdDate to set
+	 */
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate != null ? (Date) createdDate.clone() : null;
+	}
+
+	/**
+	 * @return the modifiedDate
+	 */
+	public Date getModifiedDate() {
+		return modifiedDate != null ? (Date) modifiedDate.clone() : null;
+	}
+
+	/**
+	 * @param modifiedDate the modifiedDate to set
+	 */
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate != null ? (Date) modifiedDate.clone() : null;
+	}
+
+	/**
 	 * @return the parentTask
 	 */
 	public AppTParentTask getParentTask() {
@@ -202,11 +238,14 @@ public class AppTTask implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((active == null) ? 0 : active.hashCode());
 		result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
 		result = prime * result + ((parentTask == null) ? 0 : parentTask.hashCode());
 		result = prime * result + ((priority == null) ? 0 : priority.hashCode());
 		result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
 		result = prime * result + ((taskName == null) ? 0 : taskName.hashCode());
+		result = prime * result + ((createdDate == null) ? 0 : createdDate.hashCode());
+		result = prime * result + ((modifiedDate == null) ? 0 : modifiedDate.hashCode());
 		return result;
 	}
 
@@ -222,6 +261,11 @@ public class AppTTask implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		AppTTask other = (AppTTask) obj;
+		if (active == null) {
+			if (other.active != null)
+				return false;
+		} else if (!active.equals(other.active))
+			return false;
 		if (endDate == null) {
 			if (other.endDate != null)
 				return false;
@@ -247,6 +291,16 @@ public class AppTTask implements Serializable {
 				return false;
 		} else if (!taskName.equals(other.taskName))
 			return false;
+		if (createdDate == null) {
+			if (other.createdDate != null)
+				return false;
+		} else if (!createdDate.equals(other.createdDate))
+			return false;
+		if (modifiedDate == null) {
+			if (other.modifiedDate != null)
+				return false;
+		} else if (!modifiedDate.equals(other.modifiedDate))
+			return false;
 		return true;
 	}
 
@@ -256,6 +310,7 @@ public class AppTTask implements Serializable {
 	@Override
 	public String toString() {
 		return "AppTTask [taskId=" + taskId + ", taskName=" + taskName + ", priority=" + priority + ", startDate="
-				+ startDate + ", endDate=" + endDate + ", parentTask=" + parentTask + "]";
+				+ startDate + ", endDate=" + endDate + ", active=" + active + ", createdDate=" + createdDate
+				+ ", modifiedDate=" + modifiedDate + ", parentTask=" + parentTask + "]";
 	}
 }

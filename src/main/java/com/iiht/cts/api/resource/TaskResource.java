@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.iiht.cts.api.model.AppTTask;
 import com.iiht.cts.api.service.ITaskService;
 import com.iiht.cts.api.vo.Task;
 
@@ -76,7 +75,7 @@ public class TaskResource {
 	 *	}
 	 * </pre>
 	 * 
-	 * @return a list of {@link AppTTask} with Response Status as 200 OK
+	 * @return a list of {@link Task} with Response Status as 200 OK
 	 */
 	@RequestMapping(method=RequestMethod.GET)
 	public ResponseEntity<Resources<Task>> getAllTasks() {
@@ -136,8 +135,8 @@ public class TaskResource {
 	 *   }
 	 * </pre>
 	 * 
-	 * @param task refers to a new instance of {@link AppTTask}
-	 * @return a newly added {@link AppTTask} with Response Status as 201 Created
+	 * @param task refers to a new instance of {@link Task}
+	 * @return a newly added {@link Task} with Response Status as 201 Created
 	 */
 	@RequestMapping(method=RequestMethod.POST)
 	public ResponseEntity<Resource<Task>> addTask(@RequestBody Task task) {
@@ -146,7 +145,7 @@ public class TaskResource {
 		// Populates All Links for Task and Tasks
 	    Links allLinks = populateLinks(savedTask.getTaskId());
 		// Initialises HATEOAS Resource for newly added Task Resource with list of Links
-		Resource<AppTTask> resource = new Resource<AppTTask>(savedTask, allLinks);
+		Resource<Task> resource = new Resource<Task>(savedTask, allLinks);
 		// URI Builder to build newly created resource location
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{taskId}")
 				.buildAndExpand(savedTask.getTaskId()).toUri();
@@ -190,16 +189,16 @@ public class TaskResource {
 	 * </pre>
 	 * 
 	 * @param taskId refers to attribute {@code taskId}
-	 * @return a single {@link AppTTask} identified by its id with Response Status as 200 OK
+	 * @return a single {@link Task} identified by its id with Response Status as 200 OK
 	 */
 	@RequestMapping(value="/{taskId}", method=RequestMethod.GET)
-	public ResponseEntity<Resource<AppTTask>> getTask(@PathVariable Long taskId) {
+	public ResponseEntity<Resource<Task>> getTask(@PathVariable Long taskId) {
 		// Retrieves requested Task details
-		AppTTask task = taskService.getTask(taskId);
+		Task task = taskService.getTask(taskId);
 		// Populates All Links for Task and Tasks
 	    Links allLinks = populateLinks(taskId);
 		// Initialises HATEOAS Resource for requested Task Resource with list of Links
-		Resource<AppTTask> resource = new Resource<AppTTask>(task, allLinks);
+		Resource<Task> resource = new Resource<Task>(task, allLinks);
 		// Returns the ResponseEntity with HTTPStatus as OK {200}
 		return ResponseEntity.ok(resource);
 	}
@@ -228,12 +227,12 @@ public class TaskResource {
 	 * {@code Response 201 (application/hal+json)}
 	 * 
 	 *   {
-	 *   	 "taskId": 1001,
 	 *	     "taskName": "Task 1",
 	 *	     "priority": 15,
 	 *	     "startDate": "2018-12-01",
 	 *		 "endDate": "2018-12-31",
 	 *	     "parentTask": {
+	 *			"parentTaskId": 1001,
 	 *			"ParentTaskName": "Parent Task 1"
 	 *	     },
 	 *	     "_links": {
@@ -248,24 +247,49 @@ public class TaskResource {
 	 * </pre>
 	 * 
 	 * @param taskId refers to attribute {@code taskId}
-	 * @param task refers to an edited instance of {@link AppTTask}
-	 * @return an updated {@link AppTTask} identified by its id with Response Status as 201 Created
+	 * @param task refers to an edited instance of {@link Task}
+	 * @return an updated {@link Task} identified by its id with Response Status as 201 Created
 	 */
 	@RequestMapping(value="/{taskId}", method=RequestMethod.PUT)
-	public ResponseEntity<Resource<AppTTask>> updateTask(@PathVariable Long taskId,
-			@RequestBody AppTTask task) {
+	public ResponseEntity<Resource<Task>> updateTask(@PathVariable Long taskId,
+			@RequestBody Task task) {
 		// Updates and Returns edited Task details
-		AppTTask updatedTask = taskService.updateTask(taskId, task);
+		Task updatedTask = taskService.updateTask(taskId, task);
 		// Populates All Links for Task and Tasks
 	    Links allLinks = populateLinks(taskId);
 		// Initialises HATEOAS Resource for updated Task Resource with list of Links
-		Resource<AppTTask> resource = new Resource<AppTTask>(updatedTask, allLinks);
+		Resource<Task> resource = new Resource<Task>(updatedTask, allLinks);
 		// URI Builder to build updated resource location
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 				.buildAndExpand(updatedTask.getTaskId()).toUri();
 		// Returns the ResponseEntity with HTTPStatus as Created {201}
 		return ResponseEntity.created(location).body(resource);
 	}
+	
+/*	*//**
+	 * <strong>Deletes a Task Entity [<tt>DELETE</tt>]</strong>
+	 * <br>
+	 * Ends an existing <tt>Task</tt> details identified by its
+	 * <tt>{id}</tt> with <tt>DELETE</tt> method.
+	 * 
+	 * <pre>
+	 * {@code Request}
+	 * 
+	 * 	Headers
+	 * 		Location: /tasks/1001
+	 * 
+	 * {@code Response 204}
+	 * </pre>
+	 * 
+	 * @param taskId refers to attribute {@code taskId}
+	 *//*
+	@RequestMapping(value="/{taskId}", method=RequestMethod.PUT)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public HeadersBuilder<?> endTask(@PathVariable Long taskId) {
+		// Ends the requested Task Resource with Response HTTPStatus as No Content {204}
+		taskService.endTask(taskId);
+		return ResponseEntity.noContent();
+	}*/
 	
 	/**
 	 * <strong>Deletes a Task Entity [<tt>DELETE</tt>]</strong>

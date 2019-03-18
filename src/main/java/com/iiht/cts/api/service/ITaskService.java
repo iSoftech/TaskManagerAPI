@@ -50,10 +50,10 @@ public interface ITaskService {
 	 */
 	public void deleteTask(Long taskId);
 
-	/**
+/*	*//**
 	 * Ends an Existing Task
 	 * 
 	 * @param taskId refers to attribute {@code taskId}
-	 */
-	public void endTask(Long taskId);
+	 *//*
+	public void endTask(Long taskId);*/
 }
