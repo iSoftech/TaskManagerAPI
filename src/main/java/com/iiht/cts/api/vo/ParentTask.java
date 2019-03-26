@@ -2,9 +2,6 @@ package com.iiht.cts.api.vo;
 
 import java.util.List;
 
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.core.Relation;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -12,8 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * 
  * @author Mohamed Yusuff
  */
-@Relation(collectionRelation = "parentTasks")
-public class ParentTask extends ResourceSupport {
+public class ParentTask {
 	
 	private Long parentTaskId;
 	
@@ -30,7 +26,7 @@ public class ParentTask extends ResourceSupport {
 	}
 
 	/**
-	 * Argument Constructor to initialize Entity with Values
+	 * Argument Constructor to initialize VO with Values
 	 * 
 	 * @param parentTaskId
 	 * @param parentTaskName

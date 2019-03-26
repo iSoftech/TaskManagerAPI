@@ -2,9 +2,6 @@ package com.iiht.cts.api.vo;
 
 import java.util.Date;
 
-import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.core.Relation;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -13,10 +10,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * 
  * @author Mohamed Yusuff
  */
-@Relation(collectionRelation = "tasks")
-public class Task extends ResourceSupport {
+public class Task {
 
-	@JsonIgnore
 	private Long taskId;
 	
 	private String taskName;
@@ -44,7 +39,7 @@ public class Task extends ResourceSupport {
 	}
 
 	/**
-	 * Argument Constructor to initialize Entity with Values
+	 * Argument Constructor to initialize VO with Values
 	 * 
 	 * @param taskId
 	 * @param taskName
@@ -110,7 +105,7 @@ public class Task extends ResourceSupport {
 	/**
 	 * @return the startDate
 	 */
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
+	/*@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")*/
 	public Date getStartDate() {
 		return startDate != null ? (Date) startDate.clone() : null;
 	}
@@ -125,7 +120,7 @@ public class Task extends ResourceSupport {
 	/**
 	 * @return the endDate
 	 */
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
+	/*@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")*/
 	public Date getEndDate() {
 		return endDate != null ? (Date) endDate.clone() : null;
 	}
@@ -154,6 +149,7 @@ public class Task extends ResourceSupport {
 	/**
 	 * @return the createdDate
 	 */
+	@JsonIgnore
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
 	public Date getCreatedDate() {
 		return createdDate != null ? (Date) createdDate.clone() : null;
@@ -169,6 +165,7 @@ public class Task extends ResourceSupport {
 	/**
 	 * @return the modifiedDate
 	 */
+	@JsonIgnore
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
 	public Date getModifiedDate() {
 		return modifiedDate != null ? (Date) modifiedDate.clone() : null;

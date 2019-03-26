@@ -1,6 +1,7 @@
 package com.iiht.cts.api.resource;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -47,9 +48,9 @@ public class TaskResourceTests {
 
 	private static final String SLASH = "/";
 
-	private static final String APPLICATION_HAL_JSON = "application/hal+json;charset=UTF-8";
+	private static final String APPLICATION_JSON = "application/json;charset=UTF-8";
 
-	private MediaType contentType = MediaType.valueOf(APPLICATION_HAL_JSON);
+	private MediaType contentType = MediaType.valueOf(APPLICATION_JSON);
 	
 	@Autowired
 	MockMvc mockMvc;
@@ -82,7 +83,10 @@ public class TaskResourceTests {
 	@Test
 	public void a_testCreateTask() throws Exception {
 		// Invokes [/tasks] Resource with ContentType as "application/json;charset=UTF-8" and verifies the
-		// Return Response Status is 201 - CREATED and ContentType as "application/hal+json;charset=UTF-8" 
+		// Return Response Status is 201 - CREATED and ContentType as "application/json;charset=UTF-8"
+		task.setTaskId(Long.valueOf(1010));
+		task.setTaskName("Task 10");
+		task.getParentTask().setParentTaskId(null);
 		this.mockMvc
 				.perform(post(CONTEXT_PATH).contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
 						.content(new ObjectMapper().writeValueAsString(task)))
@@ -96,7 +100,7 @@ public class TaskResourceTests {
 	 */
 	@Test
 	public void b_testCreateTaskAlreadyExistWithSameParentTask() throws Exception {
-		// Invokes [/tasks] Resource with ContentType as "application/hal+json;charset=UTF-8" and verifies the
+		// Invokes [/tasks] Resource with ContentType as "application/json;charset=UTF-8" and verifies the
 		// Return Response Status is 409 - CONFLICT
 		this.mockMvc.perform(post(CONTEXT_PATH).contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
 				.content(new ObjectMapper().writeValueAsString(task))).andExpect(status().isConflict());
@@ -110,7 +114,7 @@ public class TaskResourceTests {
 	@Test
 	public void c_testGetAllTasksFound() throws Exception {
 		// Invokes [/tasks] Resource and verifies the Return Response Status is 200 - OK
-		// and ContentType is "application/hal+json;charset=UTF-8"
+		// and ContentType is "application/json;charset=UTF-8"
 		mockMvc.perform(get(CONTEXT_PATH)).andExpect(status().isOk())
 				.andExpect(content().contentType(contentType));
 	}
@@ -135,11 +139,11 @@ public class TaskResourceTests {
 	@Test
 	public void e_testGetTask() throws Exception {
 		// Invokes [/tasks/{taskId}] Resource and verifies the Return Response Status is 200 - OK
-		// and ContentType is "application/hal+json;charset=UTF-8" and Details are same
+		// and ContentType is "application/json;charset=UTF-8" and Details are same
 		mockMvc.perform(get(CONTEXT_PATH + SLASH + task.getTaskId()))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_HAL_JSON))
-				.andExpect(jsonPath("$.name", is((task.getTaskName()))))
-				.andExpect(jsonPath("$.parentTask.parentTaskName", is((task.getParentTask().getParentTaskName()))));
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(jsonPath("$.response.taskName", is((task.getTaskName()))))
+				.andExpect(jsonPath("$.response.parentTask.parentTaskName", is((task.getParentTask().getParentTaskName()))));
 	}
 	
 	/**
@@ -162,7 +166,7 @@ public class TaskResourceTests {
 	@Test
 	public void g_testGetTaskInvalidArgument() throws Exception {
 		// Invokes [/tasks/{taskId}] Resource and verifies the Return Response Status is 400 - BAD_REQUEST
-		// and ContentType is "application/hal+json;charset=UTF-8"
+		// and ContentType is "application/json;charset=UTF-8"
 		mockMvc.perform(get("/tasks/testArg")).andExpect(status().isBadRequest());
 	}
 	
@@ -174,7 +178,7 @@ public class TaskResourceTests {
 	@Test
 	public void h_testUpdateTask() throws Exception {
 		// Invokes [/tasks/{taskId}] Resource with ContentType as "application/json;charset=UTF-8" and
-		// verifies the Return Response Status is 201 - CREATED, ContentType is "application/hal+json;charset=UTF-8" and
+		// verifies the Return Response Status is 201 - CREATED, ContentType is "application/json;charset=UTF-8" and
 		// Details are same
 		// To get this updated through Business Logic
 		task.getParentTask().setParentTaskId(null);
@@ -182,8 +186,8 @@ public class TaskResourceTests {
 				.perform(put(CONTEXT_PATH + SLASH + task.getTaskId()).contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
 						.content(new ObjectMapper().writeValueAsString(task)))
 				.andExpect(status().isCreated()).andExpect(content().contentType(contentType))
-				.andExpect(jsonPath("$.name", is((task.getTaskName()))))
-				.andExpect(jsonPath("$.parentTask.parentTaskName", is((task.getParentTask().getParentTaskName()))));
+				.andExpect(jsonPath("$.response.taskName", is((task.getTaskName()))))
+				.andExpect(jsonPath("$.response.parentTask.parentTaskName", is((task.getParentTask().getParentTaskName()))));
 	}
 	
 	/**
@@ -193,9 +197,31 @@ public class TaskResourceTests {
 	 */
 	@Test
 	public void i_testUpdateTaskNotExist() throws Exception {
-		// Invokes [/tasks/{taskId}] Resource with ContentType as "application/hal+json;charset=UTF-8" and
+		// Invokes [/tasks/{taskId}] Resource with ContentType as "application/json;charset=UTF-8" and
 		// verifies the Return Response Status is 404 - NOT_FOUND
 		this.mockMvc.perform(put(CONTEXT_PATH + SLASH + Long.valueOf(5001)).contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
 				.content(new ObjectMapper().writeValueAsString(task))).andExpect(status().isNotFound());
+	}
+	
+	/**
+	 * Tests Delete a Task
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void j_testDeleteTask() throws Exception {
+		// Invokes [/tasks/{taskId}] Resource and verifies the Return Response Status is 204 - NO_CONTENT
+		mockMvc.perform(delete(CONTEXT_PATH + SLASH + task.getTaskId())).andExpect(status().isNoContent());
+	}
+	
+	/**
+	 * Tests Delete a Task Not Found
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void k_testDeleteTaskNotFound() throws Exception {
+		// Invokes [/tasks/{taskId}] Resource and verifies the Return Response Status is 404 - NOT_FOUND
+		mockMvc.perform(delete(CONTEXT_PATH + SLASH + Long.valueOf(5001))).andExpect(status().isNotFound());
 	}
 }

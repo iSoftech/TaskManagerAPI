@@ -6,17 +6,19 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.iiht.cts.api.model.AppTParentTask;
 
 /**
- * Task Manager Restful API Repository Interface for <tt>/tasks</tt> Resource with CRUD operations Implemented
+ * Task Manager Restful API Repository Interface for <tt>/tasks</tt> Resource with CRUD operations implemented
  * with built in {@link JpaRepositry} using MySQL Database
  * 
  * @author Mohamed Yusuff
  */
-@Repository
+@CrossOrigin(origins = "http://localhost:4200")
+@RepositoryRestResource
 public interface IParentTaskRepository extends JpaRepository<AppTParentTask, Long> {
 
 	/**

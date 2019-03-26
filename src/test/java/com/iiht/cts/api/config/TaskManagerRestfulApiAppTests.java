@@ -1,4 +1,4 @@
-package com.iiht.cts.api.boot;
+package com.iiht.cts.api.config;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,9 +29,9 @@ import com.iiht.cts.api.service.ITaskService;
 @WebMvcTest
 public class TaskManagerRestfulApiAppTests {
 
-	private static final String APPLICATION_HAL_JSON = "application/hal+json;charset=UTF-8";
+	private static final String APPLICATION_JSON = "application/json;charset=UTF-8";
 
-	private MediaType contentType = MediaType.valueOf(APPLICATION_HAL_JSON);
+	private MediaType contentType = MediaType.valueOf(APPLICATION_JSON);
 	
 	@Autowired
 	MockMvc mockMvc;
@@ -65,9 +65,9 @@ public class TaskManagerRestfulApiAppTests {
 	@Test
 	public void testGetAllTasks() throws Exception {
 		// Invokes [/tasks] Resource and verifies the Return Response Status is 200 - OK
-		// and ContentType is "application/hal+json;charset=UTF-8"
+		// and ContentType is "application/json;charset=UTF-8"
 		mockMvc.perform(MockMvcRequestBuilders.get("/tasks")
-				.accept(APPLICATION_HAL_JSON)).andExpect(status().isOk())
+				.accept(APPLICATION_JSON)).andExpect(status().isOk())
 		.andExpect(content().contentType(contentType));
 		// Verifies If taskService.getAllTasks() is invoked at least once
 		Mockito.verify(taskService).getAllTasks();

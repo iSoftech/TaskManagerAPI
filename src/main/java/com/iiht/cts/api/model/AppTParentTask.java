@@ -15,7 +15,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.springframework.hateoas.ResourceSupport;
-import org.springframework.hateoas.core.Relation;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -25,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Mohamed Yusuff
  */
 @Entity
-@Relation(collectionRelation = "parentTasks")
 @Table (name="APP_T_PARENT_TASK")
 public class AppTParentTask extends ResourceSupport implements Serializable {
 	

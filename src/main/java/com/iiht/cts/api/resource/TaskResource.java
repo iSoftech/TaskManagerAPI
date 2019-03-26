@@ -1,19 +1,13 @@
 package com.iiht.cts.api.resource;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-
 import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Links;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ResponseEntity.HeadersBuilder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,13 +18,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.iiht.cts.api.service.ITaskService;
 import com.iiht.cts.api.vo.Task;
+import com.iiht.cts.api.vo.TaskResponse;
 
 /**
  * Task Manager Restful API Controller for <tt>/tasks</tt> Resource with CRUD operations.
  * 
  * @author Mohamed Yusuff
  */
-@RequestMapping(value="/tasks", produces="application/hal+json")
+@RequestMapping(value="/tasks", produces="application/json")
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class TaskResource {
 
@@ -44,55 +40,40 @@ public class TaskResource {
 	 * for resource {@code /tasks}.
 	 * 
 	 * <pre>
-	 * {@code Response 200 (application/hal+json)}
+	 * {@code Response 200 (application/json)}
 	 * 	
 	 *	{
-	 *	    "_embedded": {
-	 *	        "tasks": [
-	 *	            {
-	 *	                "taskName": "Task 1",
-	 *	                "priority": 10,
-	 *	                "startDate": "2018-12-01",
-	 *					"endDate": "2018-12-31",
-	 *					"active": "Y",
-	 *	                "parentTask": {
-	 *	                    "parentTaskId": 1001,
-	 *	                    "ParentTaskName": "Parent Task 1"
-	 *	                },
-	 *	                "_links": {
-	 *	                    "self": {
-	 *	                        "href": "http://localhost:8080/TaskManager/api/tasks/1001"
-	 *	                    }
-	 *                  }
+	 *	    "statusCode": 200,
+	 *	    "message": "Tasks retrieved!!",
+	 *	    "response": [
+	 *	        {
+	 *				"taskId": 1001,
+	 *	            "taskName": "Task 1",
+	 *	            "priority": 10,
+	 *	            "startDate": "2018-12-01",
+	 *				"endDate": "2018-12-31",
+	 *				"active": "Y",
+	 *	            "parentTask": {
+	 *	                 "parentTaskId": 1001,
+	 *	                 "ParentTaskName": "Parent Task 1"
 	 *	            }
-	 *	        ]
-	 *	    },
-	 *	    "_links": {
-	 *	        "self": {
-	 *	            "href": "http://localhost:8080/TaskManager/api/tasks"
 	 *	        }
-	 *	    }
+	 *	    ]
 	 *	}
 	 * </pre>
 	 * 
 	 * @return a list of {@link Task} with Response Status as 200 OK
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(method=RequestMethod.GET)
-	public ResponseEntity<Resources<Task>> getAllTasks() {
+	public ResponseEntity<TaskResponse<List<Task>>> getAllTasks() {
 		// Retrieves All Tasks details
 		List<Task> allTasks = taskService.getAllTasks();
-		// Iterates through all tasks details to set Self Link to individual Task
-	    for (Task task : allTasks) {
-	        // Self Link to newly added Task resource [/tasks/{taskId}]
-	        Link selfLink = linkTo(TaskResource.class).slash(task.getTaskId()).withSelfRel();
-	        task.add(selfLink);
-	    }
-	    // Populates All Links for parent Tasks
-	    Links allLinks = populateLinks(null);
-		// Initialises HATEOAS Resource for newly added Task Resource with list of Links
-		Resources<Task> result = new Resources<Task>(allTasks, allLinks);
+		// Prepares Task Response with HTTPStatus as OK {200}
+		TaskResponse<List<Task>> taskResponse = (TaskResponse<List<Task>>) TaskResponse
+				.getInstance(HttpStatus.OK.value(), "Tasks retrieved!!", allTasks);
 		// Returns the ResponseEntity with HTTPStatus as OK {200}
-		return ResponseEntity.ok(result);
+		return ResponseEntity.ok(taskResponse);
 	}
 
 	/**
@@ -113,44 +94,41 @@ public class TaskResource {
 	 *		 }
 	 *   }
 	 *   
-	 * {@code Response 201 (application/hal+json)}
+	 * {@code Response 201 (application/json)}
 	 * 
 	 *   {
-	 *	     "taskName": "Task 1",
-	 *	     "priority": 10,
-	 *	     "startDate": "2018-12-01",
-	 *		 "endDate": "2018-12-31",
-	 *	     "parentTask": {
-	 *			"parentTaskId": 1001
-	 *			"ParentTaskName": "Parent Task 1"
-	 *	     },
-	 *	     "_links": {
-	 *	         "tasks": {
-	 *	             "href": "http://localhost:8086/TaskManager/api/tasks"
-	 *	         }
-	 *	         "self": {
-	 *	             "href": "http://localhost:8086/TaskManager/api/tasks/1001"
-	 *	         }
-	 *	     }
+     *		"statusCode": 201,
+     *		"message": "Task Created!!",
+     *		"response": {
+	 *	     	"taskName": "Task 1",
+	 *	     	"priority": 10,
+	 *	     	"startDate": "2018-12-01",
+	 *		 	"endDate": "2018-12-31",
+	 *			"active": "Y",
+	 *	     	"parentTask": {
+	 *				"parentTaskId": 1001
+	 *				"ParentTaskName": "Parent Task 1"
+	 *			}
+	 *  	}
 	 *   }
 	 * </pre>
 	 * 
 	 * @param task refers to a new instance of {@link Task}
 	 * @return a newly added {@link Task} with Response Status as 201 Created
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(method=RequestMethod.POST)
-	public ResponseEntity<Resource<Task>> addTask(@RequestBody Task task) {
+	public ResponseEntity<TaskResponse<Task>> addTask(@RequestBody Task task) {
 		// Adds and Returns newly added Task details
 		Task savedTask = taskService.addTask(task);
-		// Populates All Links for Task and Tasks
-	    Links allLinks = populateLinks(savedTask.getTaskId());
-		// Initialises HATEOAS Resource for newly added Task Resource with list of Links
-		Resource<Task> resource = new Resource<Task>(savedTask, allLinks);
 		// URI Builder to build newly created resource location
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{taskId}")
 				.buildAndExpand(savedTask.getTaskId()).toUri();
+		// Prepares Task Response with HTTPStatus as Created {201}
+		TaskResponse<Task> taskResponse = (TaskResponse<Task>) TaskResponse
+				.getInstance(HttpStatus.CREATED.value(), "Task Created!!", savedTask);
 		// Returns the ResponseEntity with HTTPStatus as Created {201}
-		return ResponseEntity.created(location).body(resource);
+		return ResponseEntity.created(location).body(taskResponse);
 	}
 	
 	/**
@@ -165,42 +143,39 @@ public class TaskResource {
 	 * 	Headers
 	 * 		Location: /tasks/1001
 	 * 
-	 * {@code Response 200 (application/hal+json)}
+	 * {@code Response 200 (application/json)}
 	 * 	
-	 *   {
-	 *   	 "taskId": 1001,
-	 *	     "taskName": "Task 1",
-	 *	     "priority": 15,
-	 *	     "startDate": "2018-12-01",
-	 *		 "endDate": "2018-12-31",
-	 *	     "parentTask": {
-	 *			"parentTaskId": 1001,
-	 *			"ParentTaskName": "Parent Task 1"
-	 *	     },
-	 *	     "_links": {
-	 *	         "tasks": {
-	 *	             "href": "http://localhost:8086/TaskManager/api/tasks"
-	 *	         }
-	 *	         "self": {
-	 *	             "href": "http://localhost:8086/TaskManager/api/tasks/1001"
-	 *	         }
-	 *	     }
-	 *   }
+	 *  {
+	 *		"statusCode": 200,
+	 *		"message": "Task Retrieved!!",
+	 *		"response": {
+	 *   	 	"taskId": 1001,
+	 *	    	"taskName": "Task 1",
+	 *	    	"priority": 15,
+	 *	    	"startDate": "2018-12-01",
+	 *			"endDate": "2018-12-31",
+	 *			"active": "Y",
+	 *	    	"parentTask": {
+	 *				"parentTaskId": 1001,
+	 *				"ParentTaskName": "Parent Task 1"
+	 *	    	}
+	 *  	}
+	 *  }
 	 * </pre>
 	 * 
 	 * @param taskId refers to attribute {@code taskId}
 	 * @return a single {@link Task} identified by its id with Response Status as 200 OK
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/{taskId}", method=RequestMethod.GET)
-	public ResponseEntity<Resource<Task>> getTask(@PathVariable Long taskId) {
+	public ResponseEntity<TaskResponse<Task>> getTask(@PathVariable Long taskId) {
 		// Retrieves requested Task details
 		Task task = taskService.getTask(taskId);
-		// Populates All Links for Task and Tasks
-	    Links allLinks = populateLinks(taskId);
-		// Initialises HATEOAS Resource for requested Task Resource with list of Links
-		Resource<Task> resource = new Resource<Task>(task, allLinks);
+		// Prepares Task Response with HTTPStatus as OK {200}		
+		TaskResponse<Task> taskResponse = (TaskResponse<Task>) TaskResponse
+				.getInstance(HttpStatus.OK.value(), "Tasks Retrieved!!", task);
 		// Returns the ResponseEntity with HTTPStatus as OK {200}
-		return ResponseEntity.ok(resource);
+		return ResponseEntity.ok(taskResponse);
 	}
 
 	/**
@@ -224,72 +199,45 @@ public class TaskResource {
 	 *				"ParentTaskName": "Parent Task 1"
 	 *	     	}
 	 *	    }
-	 * {@code Response 201 (application/hal+json)}
+	 * {@code Response 201 (application/json)}
 	 * 
-	 *   {
-	 *	     "taskName": "Task 1",
-	 *	     "priority": 15,
-	 *	     "startDate": "2018-12-01",
-	 *		 "endDate": "2018-12-31",
-	 *	     "parentTask": {
-	 *			"parentTaskId": 1001,
-	 *			"ParentTaskName": "Parent Task 1"
-	 *	     },
-	 *	     "_links": {
-	 *	         "tasks": {
-	 *	             "href": "http://localhost:8086/TaskManager/api/tasks"
-	 *	         }
-	 *	         "self": {
-	 *	             "href": "http://localhost:8086/TaskManager/api/tasks/1001"
-	 *	         }
-	 *	     }
-	 *   }
+	 *  {
+	 *		"statusCode": 201,
+	 *		"message": "Task Updated!!",
+	 *		"response": {
+	 *   	 	"taskId": 1001,
+	 *	     	"taskName": "Task 1",
+	 *	     	"priority": 15,
+	 *	     	"startDate": "2018-12-01",
+	 *		 	"endDate": "2018-12-31",
+	 *		 	"active": "Y",
+	 *	     	"parentTask": {
+	 *				"parentTaskId": 1001,
+	 *				"ParentTaskName": "Parent Task 1"
+	 *	     	}
+	 *   	}
+	 *  }
 	 * </pre>
 	 * 
 	 * @param taskId refers to attribute {@code taskId}
 	 * @param task refers to an edited instance of {@link Task}
 	 * @return an updated {@link Task} identified by its id with Response Status as 201 Created
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value="/{taskId}", method=RequestMethod.PUT)
-	public ResponseEntity<Resource<Task>> updateTask(@PathVariable Long taskId,
+	public ResponseEntity<TaskResponse<Task>> updateTask(@PathVariable Long taskId,
 			@RequestBody Task task) {
 		// Updates and Returns edited Task details
 		Task updatedTask = taskService.updateTask(taskId, task);
-		// Populates All Links for Task and Tasks
-	    Links allLinks = populateLinks(taskId);
-		// Initialises HATEOAS Resource for updated Task Resource with list of Links
-		Resource<Task> resource = new Resource<Task>(updatedTask, allLinks);
 		// URI Builder to build updated resource location
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 				.buildAndExpand(updatedTask.getTaskId()).toUri();
+		// Prepares Task Response with HTTPStatus as Created {201}
+		TaskResponse<Task> taskResponse = (TaskResponse<Task>) TaskResponse
+				.getInstance(HttpStatus.CREATED.value(), "Task Updated!!", updatedTask);
 		// Returns the ResponseEntity with HTTPStatus as Created {201}
-		return ResponseEntity.created(location).body(resource);
+		return ResponseEntity.created(location).body(taskResponse);
 	}
-	
-/*	*//**
-	 * <strong>Deletes a Task Entity [<tt>DELETE</tt>]</strong>
-	 * <br>
-	 * Ends an existing <tt>Task</tt> details identified by its
-	 * <tt>{id}</tt> with <tt>DELETE</tt> method.
-	 * 
-	 * <pre>
-	 * {@code Request}
-	 * 
-	 * 	Headers
-	 * 		Location: /tasks/1001
-	 * 
-	 * {@code Response 204}
-	 * </pre>
-	 * 
-	 * @param taskId refers to attribute {@code taskId}
-	 *//*
-	@RequestMapping(value="/{taskId}", method=RequestMethod.PUT)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public HeadersBuilder<?> endTask(@PathVariable Long taskId) {
-		// Ends the requested Task Resource with Response HTTPStatus as No Content {204}
-		taskService.endTask(taskId);
-		return ResponseEntity.noContent();
-	}*/
 	
 	/**
 	 * <strong>Deletes a Task Entity [<tt>DELETE</tt>]</strong>
@@ -314,28 +262,5 @@ public class TaskResource {
 		// Deletes the requested Task Resource with Response HTTPStatus as No Content {204}
 		taskService.deleteTask(taskId);
 		return ResponseEntity.noContent();
-	}
-	
-	/**
-	 * Populates and Returns All Links for Task, and Tasks
-	 * 
-	 * @param taskId refers to attribute {@code taskId}
-	 * @return {@link Links} of Parent Links for this class
-	 */
-	private Links populateLinks(Long taskId) {
-		// Parent Link to All Tasks Resource [/tasks]
-		Link tasksLink = linkTo(methodOn(this.getClass()).getAllTasks()).withSelfRel();
-		// Creates All Links with tasksLink
-		Links allLinks = new Links(tasksLink);
-		// Updates Links for Single Resource Result
-		if (null != taskId) {
-			// Self Link to newly added or update or retrieved Task Resource [/tasks/{taskId}]
-			Link selfLink = linkTo(methodOn(this.getClass()).getTask(taskId)).withSelfRel();
-			// Updates Tasks Link label to "tasks" when Task Link is referred as "self"
-			tasksLink = tasksLink.withRel("tasks");
-			// Creates All Links with tasksLink, and taskLink
-			allLinks = new Links(tasksLink, selfLink);
-		}
-		return allLinks;
 	}
 }
