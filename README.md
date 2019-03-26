@@ -20,7 +20,7 @@ Lists all Tasks available in the system with GET method for resource /tasks.
 				 "message": "Tasks retrieved!!",
 				 "response": [
 					 {
-			"taskId": 1001,
+						"taskId": 1001,
 						"taskName": "Task 1",
 						"priority": 10,
 						"startDate": "2018-12-01",
