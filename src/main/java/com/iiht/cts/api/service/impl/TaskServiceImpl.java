@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.iiht.cts.api.exception.TaskResourceExistException;
@@ -36,7 +35,6 @@ import com.iiht.cts.api.vo.Task;
  * 
  * @author Mohamed Yusuff
  */
-@CrossOrigin(origins = "http://localhost:4200")
 @Service
 public class TaskServiceImpl implements ITaskService {
 

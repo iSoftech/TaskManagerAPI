@@ -31,7 +31,7 @@ Lists all Tasks available in the system with GET method for resource /tasks.
 						"active": "Y",
 						 "parentTask": {
 							  "parentTaskId": 1001,
-							  "ParentTaskName": "Parent Task 1"
+							  "parentTaskName": "Parent Task 1"
 						 }
 					 }
 				 ]
@@ -50,7 +50,7 @@ You may create a new Task details. It takes a JSON object containing task detail
 			"startDate": "2018-12-01",
 			"endDate": "2018-12-31",
 			"parentTask": {
-				"ParentTaskName": "Parent Task 1"
+				"parentTaskName": "Parent Task 1"
 			}
 		}
 
@@ -73,7 +73,7 @@ You may create a new Task details. It takes a JSON object containing task detail
 					"active": "Y",
 					"parentTask": {
 						"parentTaskId": 1001
-						"ParentTaskName": "Parent Task 1"
+						"parentTaskName": "Parent Task 1"
 					}
 				  
 				}
@@ -108,7 +108,7 @@ Lists a Task available in the system with {taskId} path variable.
 				 "active": "Y",
 				 "parentTask": {
 					"parentTaskId": 1001,
-					"ParentTaskName": "Parent Task 1"
+					"parentTaskName": "Parent Task 1"
 				 }
 			}
 		}
@@ -131,7 +131,7 @@ You may update an existing Task details. It takes a JSON object containing task 
 				"startDate": "2018-12-01",
 				"endDate": "2018-12-31",
 				"parentTask": {
-					"ParentTaskName": "Parent Task 1"
+					"parentTaskName": "Parent Task 1"
 				}
 			}
 
@@ -155,7 +155,7 @@ You may update an existing Task details. It takes a JSON object containing task 
 				 "active": "Y",
 				 "parentTask": {
 					"parentTaskId": 1001,
-					"ParentTaskName": "Parent Task 1"
+					"parentTaskName": "Parent Task 1"
 				 }
 			}
 		}

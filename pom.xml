@@ -11,7 +11,7 @@
 	<groupId>com.iiht.cts.api</groupId>
 	<artifactId>TaskManagerRestfulAPI</artifactId>
 	<version>1.0.0</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>TaskManagerRestfulAPI</name>
 	<description>Task Manager RESTFul API Application</description>
 
@@ -58,6 +58,26 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${build.directory}/classes/static/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>../TaskManager-Web/task-manager-app/dist/task-manager-app/</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
